@@ -2,29 +2,36 @@ import { Request, Response } from 'express';
 import Borrow from '../models/borrow.model';
 import Book from '../models/book.model';
 
-export const borrowBook = async (req: Request, res: Response) => {
+export const borrowBook = async (req: Request, res: Response): Promise<void> => {
   try {
     const { book: bookId, quantity, dueDate } = req.body;
 
     const book = await Book.findById(bookId);
     if (!book) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Book not found',
       });
+      return; // ✅ Prevent further execution
     }
 
     if (book.copies < quantity) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'Not enough copies available',
       });
+      return; // ✅ Prevent further execution
     }
 
+    // ✅ TypeScript knows `book` is not null here
     book.copies -= quantity;
-    await book.updateAvailability(); // Assuming this is a method in your schema
+    await book.updateAvailability(); // ✅ Assuming this method is in your Book model
 
-    const borrow = await Borrow.create({ book: bookId, quantity, dueDate });
+    const borrow = await Borrow.create({
+      book: bookId,
+      quantity,
+      dueDate,
+    });
 
     res.status(201).json({
       success: true,
@@ -41,7 +48,7 @@ export const borrowBook = async (req: Request, res: Response) => {
   }
 };
 
-export const borrowedBooksSummary = async (req: Request, res: Response) => {
+export const borrowedBooksSummary = async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await Borrow.aggregate([
       {
@@ -52,7 +59,7 @@ export const borrowedBooksSummary = async (req: Request, res: Response) => {
       },
       {
         $lookup: {
-          from: 'books', // collection name in MongoDB (not the model name!)
+          from: 'books', // MongoDB collection name
           localField: '_id',
           foreignField: '_id',
           as: 'bookDetails',

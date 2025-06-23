@@ -7,7 +7,7 @@ interface BookQuery {
 }
 
 // Create a new book
-export const createBook = async (req: Request, res: Response) => {
+export const createBook = async (req: Request, res: Response): Promise<void> => {
   try {
     const book = await Book.create(req.body);
     res.status(201).json({
@@ -26,7 +26,7 @@ export const createBook = async (req: Request, res: Response) => {
 };
 
 // Get all books with filters, sorting, and limit
-export const getBooks = async (req: Request, res: Response) => {
+export const getBooks = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       filter,
@@ -65,14 +65,14 @@ export const getBooks = async (req: Request, res: Response) => {
 };
 
 // Get book by ID
-export const getBookById = async (req: Request, res: Response) => {
+export const getBookById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { bookId } = req.params;
 
     const book = await Book.findById(bookId);
 
     if (!book) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Book not found',
       });
@@ -94,7 +94,7 @@ export const getBookById = async (req: Request, res: Response) => {
 };
 
 // Update a book
-export const updateBook = async (req: Request, res: Response) => {
+export const updateBook = async (req: Request, res: Response): Promise<void> => {
   try {
     const { bookId } = req.params;
 
@@ -104,7 +104,7 @@ export const updateBook = async (req: Request, res: Response) => {
     });
 
     if (!updatedBook) {
-      return res.status(404).json({
+       res.status(404).json({
         success: false,
         message: 'Book not found',
       });
@@ -126,14 +126,14 @@ export const updateBook = async (req: Request, res: Response) => {
 };
 
 // Delete a book
-export const deleteBook = async (req: Request, res: Response) => {
+export const deleteBook = async (req: Request, res: Response): Promise<void> => {
   try {
     const { bookId } = req.params;
 
     const deletedBook = await Book.findByIdAndDelete(bookId);
 
     if (!deletedBook) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Book not found',
         data: null,
